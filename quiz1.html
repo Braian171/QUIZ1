@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Quiz</h1>
+    <p>Select a language:</p>
+    <button id="englishButton">English</button>
+    <button id="italianButton">Italiano</button>
+
+    <div id="quizContainer" class="hidden">
+        <form id="quizForm">
+            <div id="questions"></div>
+            <button type="button" id="submitButton">Submit</button>
+        </form>
+    </div>
+
+    <div id="resultContainer" class="hidden">
+        <p class="result" id="score"></p>
+        <h2>Correct Answers:</h2>
+        <ul id="answers"></ul>
+    </div>
+
+    <script>
+        const quizData = {
+            english: [
+                { question: "What is the capital of France?", options: ["Paris", "London", "Berlin"], answer: "Paris" },
+                { question: "Which planet is known as the Red Planet?", options: ["Mars", "Earth", "Jupiter"], answer: "Mars" },
+                { question: "What is the largest ocean on Earth?", options: ["Atlantic", "Pacific", "Indian"], answer: "Pacific" },
+                { question: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Dickens", "Austen"], answer: "Shakespeare" },
+                { question: "What is the chemical symbol for water?", options: ["H2O", "O2", "CO2"], answer: "H2O" },
+                { question: "How many continents are there?", options: ["5", "6", "7"], answer: "7" },
+                { question: "What is the square root of 64?", options: ["6", "8", "10"], answer: "8" },
+                { question: "Who painted the Mona Lisa?", options: ["Da Vinci", "Van Gogh", "Picasso"], answer: "Da Vinci" },
+                { question: "What is the fastest land animal?", options: ["Cheetah", "Lion", "Horse"], answer: "Cheetah" },
+                { question: "What is the capital of Japan?", options: ["Tokyo", "Osaka", "Kyoto"], answer: "Tokyo" },
+                { question: "Which element has the atomic number 1?", options: ["Helium", "Oxygen", "Hydrogen"], answer: "Hydrogen" },
+                { question: "What is 9 x 9?", options: ["81", "72", "64"], answer: "81" },
+                { question: "Which country is known as the Land of the Rising Sun?", options: ["China", "Japan", "South Korea"], answer: "Japan" },
+                { question: "What is the main ingredient in sushi?", options: ["Rice", "Bread", "Potato"], answer: "Rice" },
+                { question: "How many sides does a hexagon have?", options: ["5", "6", "7"], answer: "6" },
+                { question: "Who discovered gravity?", options: ["Newton", "Einstein", "Galileo"], answer: "Newton" },
+                { question: "What is the capital of Italy?", options: ["Rome", "Venice", "Florence"], answer: "Rome" },
+                { question: "Which organ pumps blood through the body?", options: ["Liver", "Heart", "Kidney"], answer: "Heart" },
+                { question: "What is the smallest prime number?", options: ["1", "2", "3"], answer: "2" },
+                { question: "What is the boiling point of water?", options: ["100°C", "50°C", "150°C"], answer: "100°C" }
+            ],
+            italian: [
+                { question: "Qual è la capitale della Francia?", options: ["Parigi", "Londra", "Berlino"], answer: "Parigi" },
+                { question: "Quale pianeta è conosciuto come il Pianeta Rosso?", options: ["Marte", "Terra", "Giove"], answer: "Marte" },
+                { question: "Qual è l'oceano più grande della Terra?", options: ["Atlantico", "Pacifico", "Indiano"], answer: "Pacifico" },
+                { question: "Chi ha scritto 'Amleto'?", options: ["Shakespeare", "Dickens", "Austen"], answer: "Shakespeare" },
+                { question: "Qual è il simbolo chimico dell'acqua?", options: ["H2O", "O2", "CO2"], answer: "H2O" },
+                { question: "Quanti continenti ci sono?", options: ["5", "6", "7"], answer: "7" },
+                { question: "Qual è la radice quadrata di 64?", options: ["6", "8", "10"], answer: "8" },
+                { question: "Chi ha dipinto la Gioconda?", options: ["Da Vinci", "Van Gogh", "Picasso"], answer: "Da Vinci" },
+                { question: "Qual è l'animale terrestre più veloce?", options: ["Ghepardo", "Leone", "Cavallo"], answer: "Ghepardo" },
+                { question: "Qual è la capitale del Giappone?", options: ["Tokyo", "Osaka", "Kyoto"], answer: "Tokyo" },
+                { question: "Quale elemento ha il numero atomico 1?", options: ["Elio", "Ossigeno", "Idrogeno"], answer: "Idrogeno" },
+                { question: "Quanto fa 9 x 9?", options: ["81", "72", "64"], answer: "81" },
+                { question: "Quale paese è conosciuto come la Terra del Sol Levante?", options: ["Cina", "Giappone", "Corea del Sud"], answer: "Giappone" },
+                { question: "Qual è l'ingrediente principale del sushi?", options: ["Riso", "Pane", "Patata"], answer: "Riso" },
+                { question: "Quanti lati ha un esagono?", options: ["5", "6", "7"], answer: "6" },
+                { question: "Chi ha scoperto la gravità?", options: ["Newton", "Einstein", "Galileo"], answer: "Newton" },
+                { question: "Qual è la capitale d'Italia?", options: ["Roma", "Venezia", "Firenze"], answer: "Roma" },
+                { question: "Quale organo pompa il sangue nel corpo?", options: ["Fegato", "Cuore", "Rene"], answer: "Cuore" },
+                { question: "Qual è il più piccolo numero primo?", options: ["1", "2", "3"], answer: "2" },
+                { question: "Qual è il punto di ebollizione dell'acqua?", options: ["100°C", "50°C", "150°C"], answer: "100°C" }
+            ]
+        };
+
+        let selectedLanguage = "";
+
+        document.getElementById("englishButton").onclick = () => loadQuiz("english");
+        document.getElementById("italianButton").onclick = () => loadQuiz("italian");
+
+        function loadQuiz(language) {
+            selectedLanguage = language;
+            const questionsContainer = document.getElementById("questions");
+            questionsContainer.innerHTML = "";
+
+            quizData[language].forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question");
+
+                const questionText = document.createElement("p");
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                q.options.forEach(option => {
+                    const label = document.createElement("label");
+                    label.innerHTML = `<input type="radio" name="question${index}" value="${option}"> ${option}`;
+                    questionDiv.appendChild(label);
+                    questionDiv.appendChild(document.createElement("br"));
+                });
+
+                questionsContainer.appendChild(questionDiv);
+            });
+
+            document.getElementById("quizContainer").classList.remove("hidden");
+        }
+
+        document.getElementById("submitButton").addEventListener("click", submitQuiz);
+
+        function submitQuiz() {
+            const form = document.getElementById("quizForm");
+            const formData = new FormData(form);
+            let score = 0;
+            const correctAnswers = quizData[selectedLanguage].map(q => q.answer);
+            const userAnswers = [];
+
+            correctAnswers.forEach((correctAnswer, index) => {
+                const userAnswer = formData.get(`question${index}`);
+                userAnswers.push(userAnswer);
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+
+            document.getElementById("score").textContent = `Your score: ${score}/${correctAnswers.length}`;
+
+            const answersList = document.getElementById("answers");
+            answersList.innerHTML = "";
+            correctAnswers.forEach((answer, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${index + 1}. ${answer}`;
+                answersList.appendChild(listItem);
+            });
+
+            document.getElementById("quizContainer").classList.add("hidden");
+            document.getElementById("resultContainer").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
